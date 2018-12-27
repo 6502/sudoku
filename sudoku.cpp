@@ -1,3 +1,4 @@
+#include <functional>
 #include <stdio.h>
 #include <math.h>
 #include "images.h"
@@ -100,7 +101,6 @@ int main(int argc, const char *argv[]) {
     PARM(double, threshold, "Binarization threshold", "0.8");
     PARM(int, sz, "Rectified cell size", "100");
     PARM(int, maxerr, "Maximum error threshold", "50");
-    PARM(int, changes, "Maximum number of changes to compute", "81");
 
     parse_argv("sudoku", argc, argv);
 
@@ -117,10 +117,12 @@ int main(int argc, const char *argv[]) {
         for (int x=0; x<w; x++) {
             if (src(x, y) == 0) {
                 auto res = blob(src, x, y);
-                int a = (res.x1 - res.x0)*(res.y1 - res.y0);
-                if (a > best) {
-                    best = a;
-                    area = res.pts;
+                if (res.x0 > 0 && res.x1 < w && res.y0 > 0 && res.y1 < h) {
+                    int a = (res.x1 - res.x0)*(res.y1 - res.y0);
+                    if (a > best) {
+                        best = a;
+                        area = res.pts;
+                    }
                 }
             }
         }
@@ -364,6 +366,9 @@ int main(int argc, const char *argv[]) {
     }
 
     if (debug_name != "") saveImage(debug, debug_name);
+
+    // Backtracking solver
+
     for (int i=0; i<9; i++) {
         for (int j=0; j<9; j++) {
             if (data[i*9+j]) {
@@ -376,41 +381,90 @@ int main(int argc, const char *argv[]) {
     }
     printf("\n");
 
-    auto avail = [&](int i, int j)->unsigned {
-                     unsigned taken = 0;
-                     int block = (i/3*3)*9+(j/3*3);
-                     for (int k=0; k<9; k++) {
-                         taken |= 1 << data[i*9+k];
-                         taken |= 1 << data[k*9+j];
-                         taken |= 1 << data[block+k/3*9+k%3];
-                     }
-                     return 511 - (taken >> 1);
-                 };
+    std::vector<unsigned> used(9+9+9);
+    auto data0 = data;
 
-    for (;;) {
-        bool updated = false;
-        for (int i=0; i<9; i++) {
-            for (int j=0; j<9; j++) {
-                if (data[i*9+j] == 0 && changes>0) {
-                    unsigned a = avail(i, j);
-                    if ((a & (a-1)) == 0) {
-                        changes--;
-                        int d = 1;
-                        while (a>1) {
-                            d++;
-                            a = a>>1;
-                        }
-                        data[i*9+j] = d;
-                        show(i, j, d-1, 0x000100);
-                        updated = true;
-                    }
+    for (int i=0; i<9; i++) {
+        for (int j=0; j<9; j++) {
+            if (data[i*9+j]) {
+                int m = 1 << (data[i*9+j] - 1), b = i/3*3 + j/3;
+                if ((used[i] | used[9+j] | used[18+b]) & m) {
+                    saveImage(out, output_name);
+                    printf("Invalid problem (bad ocr?)\n");
+                    exit(1);
                 }
+                used[i] |= m;
+                used[9+j] |= m;
+                used[18+b] |= m;
             }
         }
-        if (!updated) break;
-        break;
     }
 
+    auto play = [&](int i, int j, int d) {
+                    int m = 1<<(d-1), b = i/3*3 + j/3;
+                    data[i*9+j] ^= d;
+                    used[i] ^= m;
+                    used[9+j] ^= m;
+                    used[18+b] ^= m;
+                };
+
+    std::function<bool()> solver;
+    solver = [&]()->bool {
+                 int choice = -1;
+                 for (int i=0; i<9; i++) {
+                     for (int j=0; j<9; j++) {
+                         if (data[i*9+j] == 0) {
+                             int b = i/3*3 + j/3;
+                             unsigned a = 511 - (used[i] | used[9+j] | used[18+b]);
+                             if (a == 0) return false;
+                             if ((a & (a-1)) == 0) {
+                                 int d = 1;
+                                 while (a>1) {
+                                     d++;
+                                     a = a>>1;
+                                 }
+                                 play(i, j, d);
+                                 bool s = solver();
+                                 if (!s) play(i, j, d);
+                                 return s;
+                             } else {
+                                 choice = i*9+j;
+                             }
+                         }
+                     }
+                 }
+                 if (choice == -1) return true;
+                 int i = choice/9, j = choice%9;
+                 int b = i/3*3 + j/3;
+                 unsigned u = used[i] | used[9+j] | used[18+b];
+                 for (int d=1; d<=9; d++) {
+                     if (((1<<(d-1)) & u) == 0) {
+                         play(i, j, d);
+                         bool s = solver();
+                         if (s) return true;
+                         play(i, j, d);
+                     }
+                 }
+                 return false;
+             };
+
+    bool ok = solver();
+
+    if (!ok) printf("** FAIL **\n\n");
+
+    for (int i=0; i<9; i++) {
+        for (int j=0; j<9; j++) {
+            if (data[i*9+j]) {
+                printf(" %i", data[i*9+j]);
+                if (data[i*9+j] != data0[i*9+j]) {
+                    show(i, j, data[i*9+j]-1, 0x000100);
+                }
+            } else {
+                printf(" .");
+            }
+        }
+        printf("\n");
+    }
     saveImage(out, output_name);
 
     return 0;

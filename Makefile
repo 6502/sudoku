@@ -1,3 +1,4 @@
+#CC = g++ -Wall -O0 -g -fsanitize=address -D_GLIBCXX_DEBUG
 CC = g++ -Wall -O3
 
 ALL: sudoku
