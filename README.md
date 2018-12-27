@@ -12,7 +12,7 @@ The code implements
 - Local binarization
 - Blob detection
 - Corner detection
-- Camera matrix computation
+- Camera matrix computation (in 20 lines using random walking (!))
 - Bilinear filtering
 - Image mapping
 - Distance transform
