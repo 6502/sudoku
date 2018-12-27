@@ -1,0 +1,18 @@
+#!/bin/bash
+rm -rf test-result
+mkdir test-result
+./sudoku --src_name test-images/sudoku1.jpg --output_name test-result/out1.jpg
+./sudoku --src_name test-images/sudoku2.jpg --output_name test-result/out2.jpg
+./sudoku --src_name test-images/sudoku3.jpg --output_name test-result/out3.jpg
+./sudoku --src_name test-images/sudoku4.jpg --output_name test-result/out4.jpg
+./sudoku --src_name test-images/sudoku5.jpg --output_name test-result/out5.jpg
+./sudoku --src_name test-images/sudoku6.jpg --output_name test-result/out6.jpg
+./sudoku --src_name test-images/sudoku7.jpg --output_name test-result/out7.jpg
+./sudoku --src_name test-images/sudoku8.jpg --output_name test-result/out8.jpg
+./sudoku --src_name test-images/sudoku9.jpg --output_name test-result/out9.jpg
+./sudoku --src_name test-images/sudoku10.jpg --output_name test-result/out10.jpg
+./sudoku --src_name test-images/sudoku11.jpg --output_name test-result/out11.jpg
+./sudoku --src_name test-images/sudoku12.jpg --output_name test-result/out12.jpg
+./sudoku --src_name test-images/sudoku13.jpg --output_name test-result/out13.jpg
+./sudoku --src_name test-images/sudoku14.jpg --output_name test-result/out14.jpg
+./sudoku --src_name test-images/sudoku15.jpg --output_name test-result/out15.jpg

@@ -7,4 +7,4 @@ sudoku:	sudoku.cpp argv.h images.h random.h
 	$(CC) sudoku.cpp -o sudoku
 
 clean:
-	rm sudoku
+	rm -rf sudoku test-result
