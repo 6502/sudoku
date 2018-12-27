@@ -14,6 +14,7 @@ The code implements
 - Corner detection
 - Camera matrix computation (in 20 lines using random walking (!))
 - Bilinear filtering
+- Line drawing
 - Image mapping
 - Distance transform
 - Chamfer distance computation
