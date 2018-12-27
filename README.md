@@ -17,3 +17,5 @@ The code implements
 - Distance transform
 - Chamfer distance computation
 - Backtracking sudoku solver
+
+![example output](test-images/out7.jpg)
