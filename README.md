@@ -18,4 +18,6 @@ The code implements
 - Chamfer distance computation
 - Backtracking sudoku solver
 
+running the program with `--help` provides the list of options
+
 ![example output](test-images/out7.jpg)
