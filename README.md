@@ -13,6 +13,7 @@ The code implements
 - Blob detection
 - Corner detection
 - Camera matrix computation
+- Bilinear filtering
 - Image mapping
 - Distance transform
 - Chamfer distance computation
